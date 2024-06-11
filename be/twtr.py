@@ -441,15 +441,15 @@ def add_tweet():
     private = request.json['private']
     pic = request.json['pic']
 
-    # access_token = request.json['access-token']
-    # print("access_token:", access_token)
-    # permission = verify_token(access_token)
-    # if not permission[0]: 
-    #     print("tweet submission denied due to invalid token!")
-    #     print(permission[1])
-    #     return permission[1]
-    # else:
-    #     print('access token accepted!')
+    access_token = request.json['access-token']
+    print("access_token:", access_token)
+    permission = verify_token(access_token)
+    if not permission[0]: 
+        print("tweet submission denied due to invalid token!")
+        print(permission[1])
+        return permission[1]
+    else:
+        print('access token accepted!')
 
     tweet = dict(user=user, description=description, private=private,
                 upvote=0, date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -687,25 +687,7 @@ def mock_tweets():
 
 # This runs once before the first single request
 # Used to bootstrap our collections
-# @app.before_first_request
-# def before_first_request_func():
-#     set_env_var()
-#     applyCollectionLevelUpdates()
-
-# # This runs once before any request
-# @app.before_request
-# def before_request_func():
-#     applyRecordLevelUpdates()
-
-initialized = False
-def initialize():
-    global initialized
-    if not initialized:
-        set_env_var()
-        applyCollectionLevelUpdates()
-        initialized = True
-
-@app.before_request
+@app.before_first_request
 def before_first_request_func():
     set_env_var()
     applyCollectionLevelUpdates()
