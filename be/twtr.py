@@ -1,5 +1,5 @@
 from flask import Flask, flash, request, jsonify, render_template, redirect, url_for, g, session, send_from_directory, abort
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from flask_api import status
 from datetime import date, datetime, timedelta
 from calendar import monthrange
@@ -31,8 +31,8 @@ import jwt
 g = dict()
 
 # mongo
-#mongo_client = MongoClient('mongodb://localhost:27017/')
-mongo_client = MongoClient("mongodb+srv://admin:admin@tweets.8ugzv.mongodb.net/tweets?retryWrites=true&w=majority")
+mongo_client = MongoClient('mongodb://localhost:27017/')
+# mongo_client = MongoClient("mongodb+srv://admin:admin@tweets.8ugzv.mongodb.net/tweets?retryWrites=true&w=majority")
 class MyMongo(object):
     def __init__(self, db_name):
         self.db_name = db_name
@@ -123,6 +123,7 @@ def decode_token(token):
 # Security Endpoints
 ####################
 @app.route("/")
+@cross_origin()
 def home(): 
     return """Welcome to online mongo/twitter testing ground!<br />
         <br />
@@ -136,6 +137,7 @@ def home():
         Optionally, to purge database: http://localhost:5000/purge-db"""
 
 @app.route("/doc")
+@cross_origin()
 def doc(): 
     return """Welcome to online mongo/twitter testing ground!<br />
         <br />
@@ -152,6 +154,7 @@ def doc():
 # and password. Refresh token not used. Only meant to be used with token issuer,
 # but here the token issuer and the be are one and the same.
 @app.route("/login", methods=["POST"])
+@cross_origin()
 def login():
     try:
         user = request.json['name']
@@ -218,6 +221,7 @@ def login():
 # (auth_header = request.headers.get("Authorization")). For simplicity, I just 
 # pass access token as an extra parameter in secured API calls.
 @app.route("/fastlogin", methods=["POST"])
+@cross_origin()
 def fastlogin():
     try:
         access_token = request.json['access-token']
@@ -430,21 +434,22 @@ def ssm():
 # secured with jwt
 # endpoint to create new tweet
 @app.route("/tweet", methods=["POST"])
+@cross_origin()
 def add_tweet():
     user = request.json['user']
     description = request.json['description']
     private = request.json['private']
     pic = request.json['pic']
 
-    access_token = request.json['access-token']
-    print("access_token:", access_token)
-    permission = verify_token(access_token)
-    if not permission[0]: 
-        print("tweet submission denied due to invalid token!")
-        print(permission[1])
-        return permission[1]
-    else:
-        print('access token accepted!')
+    # access_token = request.json['access-token']
+    # print("access_token:", access_token)
+    # permission = verify_token(access_token)
+    # if not permission[0]: 
+    #     print("tweet submission denied due to invalid token!")
+    #     print(permission[1])
+    #     return permission[1]
+    # else:
+    #     print('access token accepted!')
 
     tweet = dict(user=user, description=description, private=private,
                 upvote=0, date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -457,6 +462,7 @@ def add_tweet():
 
 # endpoint to show all of today's tweets
 @app.route("/tweets-day2", methods=["GET"])
+@cross_origin()
 def get_tweets_day2():
     todaystweets = dict(
         filter(lambda elem: 
@@ -467,11 +473,13 @@ def get_tweets_day2():
 
 # endpoint to show all tweets 
 @app.route("/tweets", methods=["GET"])
+@cross_origin()
 def get_tweets2():
     return jsonify(tweets)
 
 # endpoint to show all of this week's tweets (any user)
 @app.route("/tweets-week", methods=["GET"])
+@cross_origin()
 def get_tweets_week2():
     weekstweets = dict(
         filter(lambda elem: 
@@ -481,6 +489,7 @@ def get_tweets_week2():
     return jsonify(weekstweets)
 
 @app.route("/tweets-results", methods=["GET"])
+@cross_origin()
 def get_tweets_results():
     return json.dumps({"results":
         sorted(
@@ -491,6 +500,7 @@ def get_tweets_results():
 
 
 @app.route("/tweets-week-results", methods=["GET"])
+@cross_origin()
 def get_tweets_week_results():
     weektweets = dict(
         filter(lambda elem: 
@@ -516,6 +526,7 @@ def filter_tweet(t):
                 upvote=tweet['upvote'] if 'upvote' in tweet else 0,
                 pic=tweet['pic'])
 @app.route("/tweets-user-day", methods=["POST"])
+@cross_origin()
 def get_tweets_user_day():
     user = request.json['user']
     todaystweets = dict(
@@ -537,6 +548,7 @@ def get_tweets_user_day():
 
 # endpoint to show all of this week's tweets (user-specific)
 @app.route("/tweets-user-week", methods=["POST"])
+@cross_origin()
 def get_tweets_user_week():
     user = request.json['user']
     weekstweets = dict(
@@ -558,6 +570,7 @@ def get_tweets_user_week():
 
 
 @app.route("/tweets-user-week-results", methods=["GET"])
+@cross_origin()
 def get_tweets_user_week_results():
     user = request.json['user']
     weektweets = dict(
@@ -580,6 +593,7 @@ def get_tweets_user_week_results():
 
 # endpoint to get tweet detail by id
 @app.route("/tweet/<id>", methods=["GET"])
+@cross_origin()
 def tweet_detail(id):
     return jsonify(tweets[id])
 
@@ -614,6 +628,7 @@ def applyCollectionLevelUpdates():
 
 # add new tweet, for testing
 @app.route("/dbg-tweet", methods=["GET"])
+@cross_origin()
 def dbg_tweet():
     with app.test_client() as c:
         json_data = []
@@ -629,6 +644,7 @@ def dbg_tweet():
 
 # endpoint to mock tweets
 @app.route("/mock-tweets", methods=["GET"])
+@cross_origin()
 def mock_tweets():
 
     # first, clear all collections
@@ -671,15 +687,34 @@ def mock_tweets():
 
 # This runs once before the first single request
 # Used to bootstrap our collections
-@app.before_first_request
+# @app.before_first_request
+# def before_first_request_func():
+#     set_env_var()
+#     applyCollectionLevelUpdates()
+
+# # This runs once before any request
+# @app.before_request
+# def before_request_func():
+#     applyRecordLevelUpdates()
+
+initialized = False
+def initialize():
+    global initialized
+    if not initialized:
+        set_env_var()
+        applyCollectionLevelUpdates()
+        initialized = True
+
+@app.before_request
 def before_first_request_func():
     set_env_var()
     applyCollectionLevelUpdates()
 
-# This runs once before any request
 @app.before_request
 def before_request_func():
+    initialize()
     applyRecordLevelUpdates()
+
 
 
 ############################
