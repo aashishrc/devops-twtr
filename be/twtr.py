@@ -31,8 +31,8 @@ import jwt
 g = dict()
 
 # mongo
-mongo_client = MongoClient('mongodb://localhost:27017/')
-# mongo_client = MongoClient("mongodb+srv://admin:admin@tweets.8ugzv.mongodb.net/tweets?retryWrites=true&w=majority")
+# mongo_client = MongoClient('mongodb://localhost:27017/')
+mongo_client = MongoClient("mongodb+srv://sanganiaak:BU3iF7wpw04WnEpV@twtr-cluster0.qbqkpiw.mongodb.net/")
 class MyMongo(object):
     def __init__(self, db_name):
         self.db_name = db_name
@@ -61,7 +61,7 @@ tweets = dict()
 def set_env_var():
     global g
     if 'database_url' not in g:
-        g['database_url'] = os.environ.get("DATABASE_URL", 'mongodb://localhost:27017/')
+        g['database_url'] = os.environ.get("DATABASE_URL", 'mongodb+srv://sanganiaak:BU3iF7wpw04WnEpV@twtr-cluster0.qbqkpiw.mongodb.net/')
     if 'secret_key' not in g:
         g['secret_key'] = os.environ.get("SECRET_KEY", "my_precious_1869")
     if 'bcrypt_log_rounds' not in g:
@@ -224,7 +224,7 @@ def login():
 @cross_origin()
 def fastlogin():
     try:
-        access_token = request.json['access-token']
+        # access_token = request.json['access-token']
         refresh_token = request.json['refresh-token']
 
         if not access_token or not refresh_token:
@@ -307,7 +307,7 @@ def atlas_connect():
     # });
 
     # Python
-    client = pymongo.MongoClient("mongodb+srv://admin:<password>@tweets.8ugzv.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+    client = pymongo.MongoClient("mongodb+srv://sanganiaak:BU3iF7wpw04WnEpV@twtr-cluster0.qbqkpiw.mongodb.net/")
     db = client.test
 
 
@@ -687,14 +687,14 @@ def mock_tweets():
 
 # This runs once before the first single request
 # Used to bootstrap our collections
-# @app.before_first_request
+# @app.before_request
 # def before_first_request_func():
 #     set_env_var()
 #     applyCollectionLevelUpdates()
 
-# # This runs once before any request
 # @app.before_request
 # def before_request_func():
+#     initialize()
 #     applyRecordLevelUpdates()
 
 initialized = False
@@ -704,11 +704,6 @@ def initialize():
         set_env_var()
         applyCollectionLevelUpdates()
         initialized = True
-
-@app.before_request
-def before_first_request_func():
-    set_env_var()
-    applyCollectionLevelUpdates()
 
 @app.before_request
 def before_request_func():
