@@ -42,7 +42,7 @@ version: 0.2
 
 env:
   variables:
-    AWS_REGION: "us-east-2"
+    AWS_REGION: "us-west-2"
     REACT_APP_API_SERVICE_URL: "http://localhost:5000"
 
 phases: 
@@ -68,7 +68,7 @@ phases:
       - rm -f "containerd.deb" "docker_ce.deb" "docker_ce_cli.deb" "docker_buildx_plugin.deb" "docker_compose_plugin.deb"
       # Check if Docker is installed and running
       - echo "Running docker 'hello-world' to check if installation was successful..."
-      - docker login -u chapleaashish -p Hmfac@docker
+      - docker login -u $docker_username -p $docker_password
       - docker run hello-world
   pre_build:
     commands:
