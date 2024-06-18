@@ -50,6 +50,7 @@ phases:
     commands:
       - echo "Installing Docker..."
       - apt-get update
+      - apt-get upgrade -y
       - apt-get install wget
       # Download Docker Engine packages:
       - wget --quiet -O "containerd.deb" "https://download.docker.com/linux/ubuntu/dists/jammy/pool/stable/amd64/containerd.io_1.6.33-1_amd64.deb"
