@@ -68,6 +68,7 @@ phases:
       - rm -f "containerd.deb" "docker_ce.deb" "docker_ce_cli.deb" "docker_buildx_plugin.deb" "docker_compose_plugin.deb"
       # Check if Docker is installed and running
       - echo "Running docker 'hello-world' to check if installation was successful..."
+      - docker login -u chapleaashish -p Hmfac@docker
       - docker run hello-world
   pre_build:
     commands:
@@ -78,12 +79,10 @@ phases:
       - echo "Building images [dev]..."
       - docker-compose up -d --build
       - echo "Building images [prod]..."
-      - docker build --no-cache -f ./db/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-db:prod ./db
       - docker build --no-cache -f ./be/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-be:prod ./be
       - docker build --no-cache -f ./fe/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-fe:prod --build-arg NODE_ENV=production --build-arg REACT_APP_API_SERVICE_URL=$REACT_APP_API_SERVICE_URL ./fe
   post_build:
     commands:
       - echo "Pushing [prod] images to AWS ECR..."
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-db:prod
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-be:prod
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-fe:prod
